@@ -3,38 +3,40 @@ Object = "{EAB22AC0-30C1-11CF-A7EB-0000C05BAE0B}#1.1#0"; "ieframe.dll"
 Begin VB.Form forMain 
    BorderStyle     =   1  'Fixed Single
    Caption         =   "在线课程作弊器"
-   ClientHeight    =   10005
+   ClientHeight    =   4950
    ClientLeft      =   150
    ClientTop       =   540
-   ClientWidth     =   9810
+   ClientWidth     =   4980
    LinkTopic       =   "Form1"
    MaxButton       =   0   'False
    MinButton       =   0   'False
-   ScaleHeight     =   10005
-   ScaleWidth      =   9810
+   ScaleHeight     =   4950
+   ScaleWidth      =   4980
    StartUpPosition =   2  '屏幕中心
    Begin VB.Frame fraSelect 
       BorderStyle     =   0  'None
       Caption         =   "Frame1"
       Height          =   5000
-      Left            =   4995
+      Left            =   0
       TabIndex        =   4
       Top             =   0
       Width           =   5000
       Begin VB.ListBox lisProjects 
-         Height          =   3300
+         Appearance      =   0  'Flat
+         Height          =   3270
          Left            =   500
          TabIndex        =   6
          Top             =   1000
          Width           =   4020
       End
       Begin VB.Label Label2 
-         Caption         =   "请登陆:"
-         Height          =   240
+         AutoSize        =   -1  'True
+         Caption         =   "请选择需要作弊的课程:"
+         Height          =   180
          Left            =   270
          TabIndex        =   5
          Top             =   270
-         Width           =   1860
+         Width           =   1890
       End
    End
    Begin VB.Frame fraLogin 
@@ -78,13 +80,20 @@ Begin VB.Form forMain
          End
       End
       Begin VB.Label Label1 
+         AutoSize        =   -1  'True
          Caption         =   "请登陆:"
-         Height          =   240
+         Height          =   180
          Left            =   270
          TabIndex        =   1
          Top             =   270
-         Width           =   1860
+         Width           =   630
       End
+   End
+   Begin VB.Menu login 
+      Caption         =   "重新登陆(&L)"
+   End
+   Begin VB.Menu about 
+      Caption         =   "关于(&R)"
    End
 End
 Attribute VB_Name = "forMain"
@@ -97,16 +106,19 @@ Option Explicit
 Dim prjName() As String
 Dim prjUrl() As String
 
-Private Sub Form_Click()
-    addTime
-End Sub
-
 Private Sub Form_Load()
     initLogin
 End Sub
 
 Private Function initLogin()
+    fraWeb.Visible = True
+    fraSelect.Visible = False
     web.Navigate "http://www.0755tt.com/"
+End Function
+
+Private Function initSelect()
+    fraWeb.Visible = False
+    fraSelect.Visible = True
 End Function
 
 Private Sub lisProjects_DblClick()
@@ -122,7 +134,7 @@ End Sub
 Private Sub web_DocumentComplete(ByVal pDisp As Object, URL As Variant)
     If web.LocationURL = "http://www.0755tt.com/" Then
         If web.ReadyState = READYSTATE_COMPLETE Then
-            Debug.Print "登陆准备完毕"
+            ' Debug.Print "登陆准备完毕"
         End If
     ElseIf web.LocationURL = "http://www.0755tt.com/index!index" Then
         If web.ReadyState = READYSTATE_COMPLETE Then
@@ -132,9 +144,7 @@ Private Sub web_DocumentComplete(ByVal pDisp As Object, URL As Variant)
         If web.ReadyState = READYSTATE_COMPLETE Then
             web.Document.parentWindow.execScript "var funTitle = function () { var objs = $('.content h2 a strong'); var strTitles = ''; for (var i = 0; i < objs.length; i++) { strTitles += (strTitles ? ',' : '') + $(objs[i]).text(); } return strTitles; }; var funValue = function () { var objs = $('.content .content .styled a'); var strUrls = ''; for (var i = 0; i < objs.length; i++) { var courseID = $(objs[i]).attr('href').replace(/^.*courseID=(.*)$/, '$1'); strUrls += (strUrls ? ',' : '') + courseID; } return strUrls; }; var pakReturns = funTitle() + '|' + funValue();"
             parseProjectListPage web.Document.Script.pakReturns
-            
-            'Text1.text = web.Document.body.innerhtml
-            'parseProjectListPage web.Document.body.innerhtml
+            initSelect
         End If
     End If
 End Sub
@@ -146,23 +156,25 @@ Private Sub parseProjectListPage(ByVal text As String)
     prjName = Split(arrStr(0), ",")
     prjUrl = Split(arrStr(1), ",")
     For i = 0 To UBound(prjName)
-        lisProjects.AddItem prjName(i) + " (" + prjUrl(i) + ")"
+        lisProjects.AddItem prjName(i)
     Next i
 End Sub
 
 Private Sub selectProject()
-    MsgBox lisProjects.ListIndex
     On Error Resume Next
-    MsgBox prjUrl(lisProjects.ListIndex)
+    addTime prjUrl(lisProjects.ListIndex)
 End Sub
 
-Private Sub addTime()
+Private Sub addTime(courseId)
     On Error Resume Next
     Dim time As Integer
     time = 0
     time = InputBox("请输入需要增加的小时数:")
     If time = 0 Then
         MsgBox "输入无效,请重试."
-        Return
+    Else
+        time = time * 60
+        web.Document.parentWindow.execScript "var updateOnlineTime = function(courseId, time) { $.post('TeachLearnVideo!saveOrUpdate', { time: time, courseSid: courseId }, function(data) {}, 'json'); }; updateOnlineTime('" & courseId & "', " & time & ");"
+        MsgBox "提交成功,请打开页面核实!"
     End If
 End Sub
