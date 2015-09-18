@@ -106,6 +106,10 @@ Option Explicit
 Dim prjName() As String
 Dim prjUrl() As String
 
+Private Sub about_Click()
+    MsgBox "在线课程作弊器" & vbCrLf & vbCrLf & "Version: 2015.09.19.0616" & vbCrLf & vbCrLf & "by LeaskH.com"
+End Sub
+
 Private Sub Form_Load()
     initLogin
 End Sub
@@ -113,12 +117,14 @@ End Sub
 Private Function initLogin()
     fraWeb.Visible = True
     fraSelect.Visible = False
+    web.Silent = True
     web.Navigate "http://www.0755tt.com/"
 End Function
 
 Private Function initSelect()
     fraWeb.Visible = False
     fraSelect.Visible = True
+    lisProjects.Clear
 End Function
 
 Private Sub lisProjects_DblClick()
@@ -129,6 +135,10 @@ Private Sub lisProjects_KeyUp(KeyCode As Integer, Shift As Integer)
     If KeyCode = vbKeyReturn Then
         selectProject
     End If
+End Sub
+
+Private Sub login_Click()
+    initLogin
 End Sub
 
 Private Sub web_DocumentComplete(ByVal pDisp As Object, URL As Variant)
@@ -143,8 +153,8 @@ Private Sub web_DocumentComplete(ByVal pDisp As Object, URL As Variant)
     ElseIf web.LocationURL = "http://www.0755tt.com/myCourse!myStudyCourseList" Then
         If web.ReadyState = READYSTATE_COMPLETE Then
             web.Document.parentWindow.execScript "var funTitle = function () { var objs = $('.content h2 a strong'); var strTitles = ''; for (var i = 0; i < objs.length; i++) { strTitles += (strTitles ? ',' : '') + $(objs[i]).text(); } return strTitles; }; var funValue = function () { var objs = $('.content .content .styled a'); var strUrls = ''; for (var i = 0; i < objs.length; i++) { var courseID = $(objs[i]).attr('href').replace(/^.*courseID=(.*)$/, '$1'); strUrls += (strUrls ? ',' : '') + courseID; } return strUrls; }; var pakReturns = funTitle() + '|' + funValue();"
-            parseProjectListPage web.Document.Script.pakReturns
             initSelect
+            parseProjectListPage web.Document.Script.pakReturns
         End If
     End If
 End Sub
