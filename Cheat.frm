@@ -59,5 +59,10 @@ Attribute VB_Exposed = False
 Option Explicit
 
 Private Sub Form_Load()
-
+    initLogin
 End Sub
+
+Private Function initLogin()
+    web.Navigate "http://www.0755tt.com/"
+End Function
+
