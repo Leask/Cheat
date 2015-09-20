@@ -7,6 +7,7 @@ Begin VB.Form forMain
    ClientLeft      =   150
    ClientTop       =   540
    ClientWidth     =   4980
+   Icon            =   "Cheat.frx":0000
    LinkTopic       =   "Form1"
    MaxButton       =   0   'False
    MinButton       =   0   'False
@@ -76,7 +77,7 @@ Begin VB.Form forMain
             NoFolders       =   0   'False
             Transparent     =   0   'False
             ViewID          =   "{0057D0E0-3573-11CF-AE69-08002B2E1262}"
-            Location        =   ""
+            Location        =   "http:///"
          End
       End
       Begin VB.Label Label1 
